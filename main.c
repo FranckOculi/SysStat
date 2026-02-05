@@ -4,12 +4,11 @@
 #include <math.h>
 
 int main(void) {
-    printf("Start stat\n");
+    printf("Starting system stats monitor...\n");
 
     struct SystemStats prev = {0};
     struct SystemStats current = {0};
 
-    
     int output = 0;
     output = getSystemStats(&prev);
     unsigned long deltaTotal, deltaUsage = 0;
@@ -36,10 +35,10 @@ int main(void) {
         if (current.mem.memTotal != 0 && current.mem.memActive != 0) {
             printf("Mem: %.2fG/%.fG\n", (float)current.mem.memActive / CONVERT_KB_TO_GB, ceilf((float)current.mem.memTotal / CONVERT_KB_TO_GB));
         } else {
-            printf("Mem ---\n");
+            printf("Mem: ---\n");
         }
                 
-        printf("uptime: %02d:%02d\n", current.uptimeHours, current.uptimeMinutes);
+        printf("Uptime: %02d:%02d\n", current.uptimeHours, current.uptimeMinutes);
 
         prev = current;
     };
