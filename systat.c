@@ -14,7 +14,7 @@ static int cpuStat(struct CpuStat *stat) {
     fptr = fopen("/proc/stat", "r");
 
     if (fptr == NULL) {
-        perror("cpu stat not open\n");
+        perror("cpu stat not open");
         return 1;
     }
 
@@ -41,22 +41,27 @@ static int memStat(struct MemStat *stat) {
     fptr = fopen("/proc/meminfo", "r");
 
     if (fptr == NULL) {
-        perror("meminfo not open\n");
+        perror("meminfo not open");
         return 1;
     }
 
-    char label[15];
+    char line[128];
+    char label[32];
     unsigned long value = 0;
-    char unit[3];
-    
-    for(int i = 0; i < 7; i++) {
-        if (fscanf(fptr, "%s %lu %s", label, &value, unit) == 3) {
-            if (strcmp(label, "MemTotal:") == 0) {
+
+    stat->memTotal = 0;
+    stat->memActive = 0;
+
+    while (fgets(line, sizeof(line), fptr)) {
+        if(sscanf(line, "%31[^:]: %lu", label, &value) == 2) {
+            if (strcmp(label, "MemTotal") == 0) {
                 stat->memTotal = value;
-            } else if(strcmp(label, "Active:") == 0) {
+            } else if(strcmp(label, "Active") == 0) {
                 stat->memActive = value;
             }
         }
+
+        if (stat->memTotal && stat->memActive) break;
     }
 
     cleanUp(fptr);
@@ -67,7 +72,7 @@ static int uptimeStat(int *hours, int *minutes) {
     FILE *fptr;
     fptr = fopen("/proc/uptime", "r");
     if (fptr == NULL) {
-        perror("uptime not open\n");
+        perror("uptime not open");
         return 1;
     }
 
