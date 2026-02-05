@@ -1,7 +1,6 @@
 #include "systat.h"
 #include <stdio.h>
 #include <unistd.h>
-#include <math.h>
 
 int main(void) {
     printf("Starting system stats monitor...\n");
@@ -32,8 +31,8 @@ int main(void) {
 
         printf("CPU: %.1f %%\n", cpuActive);
         
-        if (current.mem.memTotal != 0 && current.mem.memActive != 0) {
-            printf("Mem: %.2fG/%.fG\n", (float)current.mem.memActive / CONVERT_KB_TO_GB, ceilf((float)current.mem.memTotal / CONVERT_KB_TO_GB));
+        if (current.mem.memTotal != 0 && current.mem.memAvailable != 0) {
+            printf("Mem: %.1fG/%.1fG\n", ((float)current.mem.memTotal - (float)current.mem.memAvailable) / CONVERT_KB_TO_GB, (float)current.mem.memTotal / CONVERT_KB_TO_GB);
         } else {
             printf("Mem: ---\n");
         }

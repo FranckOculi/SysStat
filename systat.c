@@ -58,17 +58,17 @@ static int memStat(struct MemStat *stat) {
     unsigned long value = 0;
 
     stat->memTotal = 0;
-    stat->memActive = 0;
+    stat->memAvailable = 0;
 
     while (fgets(line, sizeof(line), fptr)) {
         if(sscanf(line, "%31[^:]: %lu", label, &value) == 2) {
             if (strcmp(label, "MemTotal") == 0) stat->memTotal = value;
-            else if(strcmp(label, "Active") == 0) stat->memActive = value;
+            else if(strcmp(label, "MemAvailable") == 0) stat->memAvailable = value;
         }
     }
 
-    if (stat->memTotal == 0 || stat->memActive == 0) {
-        fprintf(stderr, "memStat : failed to read memTotal or memActive\n");
+    if (stat->memTotal == 0 || stat->memAvailable == 0) {
+        fprintf(stderr, "memStat : failed to read memTotal or memAvailable\n");
         cleanUp(fptr);
         return -1;
     } 

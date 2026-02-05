@@ -9,7 +9,7 @@ struct CpuStat {
 };
 
 struct MemStat {
-    unsigned long memTotal, memActive;
+    unsigned long memTotal, memAvailable;
 };
 
 struct SystemStats {
