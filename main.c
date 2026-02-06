@@ -2,6 +2,29 @@
 #include <stdio.h>
 #include <unistd.h>
 
+#define RED   "\033[31m"
+#define GREEN "\033[32m"
+#define YELLOW "\033[33m"
+#define RESET "\033[0m"
+
+void printCPU(int cpu) {
+    if (cpu > 80) printf(RED "CPU: %.d%%\n" RESET, cpu);
+    else if (cpu > 40) printf(YELLOW "CPU: %d%%\n" RESET, cpu);
+    else printf(GREEN "CPU: %.d%%\n" RESET, cpu);
+}
+
+void printMEM(int mem) {
+    if (mem > 80) printf(RED "Mem: %.d%%\n" RESET, mem);
+    else if (mem > 40) printf(YELLOW "Mem: %.d%%\n" RESET, mem);
+    else printf(GREEN "Mem: %d%%\n" RESET, mem);
+}
+
+void printUptime(int hours, int minutes) {
+    if (hours >= 5) printf(RED "Uptime: %02d:%02d\n" RESET, hours, minutes);
+    else if (hours > 2) printf(YELLOW "Uptime: %02d:%02d\n" RESET, hours, minutes);
+    else printf(GREEN "Uptime: %02d:%02d\n" RESET, hours, minutes);
+}
+
 int main(void) {
     printf("Starting system stats monitor...\n");
 
@@ -29,15 +52,15 @@ int main(void) {
             cpuActive = 0.0;
         }
 
-        printf("CPU: %.1f %%\n", cpuActive);
+        printCPU((int)cpuActive);
         
         if (current.mem.memTotal != 0 && current.mem.memAvailable != 0) {
-            printf("Mem: %.1fG/%.1fG\n", ((float)current.mem.memTotal - (float)current.mem.memAvailable) / CONVERT_KB_TO_GB, (float)current.mem.memTotal / CONVERT_KB_TO_GB);
+            printMEM(100.0 * (current.mem.memTotal - current.mem.memAvailable) / current.mem.memTotal);
         } else {
             printf("Mem: ---\n");
         }
-                
-        printf("Uptime: %02d:%02d\n", current.uptimeHours, current.uptimeMinutes);
+    
+        printUptime(current.uptimeHours, current.uptimeMinutes);
 
         prev = current;
     };
