@@ -1,3 +1,5 @@
 .env
-monitor
 *.o
+monitor
+client
+server
