@@ -1,14 +1,20 @@
-CFLAGS ?= -Wall -Wextra
+CFLAGS ?= -Wall -Wextra -Iinclude
 
-all: monitor
+all: systat
 
-monitor: main.o systat.o
+systat: main.o system.o network.o serialize.o
 	gcc $(CFLAGS) -o $@ $^
 
-%.o: %.c
+printstat: printstat.o system.o
+	gcc $(CFLAGS) -o $@ $^
+
+client_test: client_test.o system.o serialize.o
+	gcc $(CFLAGS) -o $@ $^
+
+%.o: src/%.c
 	gcc $(CFLAGS) -o $@ -c $<
 
 clean:
-	rm -rf *.o all
+	rm -rf *.o
 
 .PHONY: all clean

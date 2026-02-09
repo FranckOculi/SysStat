@@ -1,3 +1,5 @@
+#include "serialize.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -8,7 +10,6 @@
 #define SOCKET_FAMILY AF_UNIX
 #define BUFFER_SIZE 1024
 #define SOCKET_NAME "/tmp/sysstat.sock"
-
 
 int main(void) {
     /* Create local socket.  */
@@ -40,29 +41,34 @@ int main(void) {
         exit(EXIT_FAILURE);
     }
 
-    const char message[] = "Hy server, I'm the client";
+    const char message[] = "Ping!";
 
     /* This is the loop to ping server every 2 seconds and receive system stats. */
+    
     while(1) {
         if ((send(data_socket, message, strlen(message), 0)) == -1) {
             perror("(Client) send");
             break;
         }
 
-        char buffer[BUFFER_SIZE];
-
-        int received_bytes = recv(data_socket, buffer, BUFFER_SIZE - 1, 0);
+        uint8_t buffer[SYSTEM_STATS_BUFFER_SIZE];
+        
+        int received_bytes = recv(data_socket, buffer, SYSTEM_STATS_BUFFER_SIZE, 0);
         if (received_bytes == -1) {
             perror("(Server) recv");
             exit(EXIT_FAILURE);
+        } else if (received_bytes != SYSTEM_STATS_BUFFER_SIZE) {
+            fprintf(stderr, "Received incomplete data\n");
+            exit(EXIT_FAILURE);
         }
 
-        /* Ensure buffer is 0-terminated.  */
+        struct system_stats stats;
+        deserialize_system_stats(&stats, buffer);
 
-        buffer[received_bytes] = '\0';
+        printf("CPU user: %lu\n", stats.cpu.user);
+        printf("Memory total: %lu\n", stats.mem.mem_total);
+        printf("Uptime: %dh %dm\n", stats.uptime_hours, stats.uptime_minutes);
 
-        printf("(Client) Reponse from server : %s\n", buffer);
-        
         sleep(2);
     }
 
