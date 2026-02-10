@@ -39,7 +39,7 @@ int main(void) {
 
     int output = 0;
     output = system_infos(&prev);
-    unsigned long delta_total, delta_usage = 0;
+    unsigned long long delta_total, delta_usage = 0;
     float cpu_active = 0.0;
 
     current = (struct system_stats) {0};

@@ -23,7 +23,7 @@ static int cpu_info(struct cpu_stats *cpu) {
     }
 
     char label[8];
-    if (fscanf(fptr, "%s %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu", 
+    if (fscanf(fptr, "%s %llu %llu %llu %llu %llu %llu %llu %llu %llu %llu", 
         label, &cpu->user, &cpu->nice, &cpu->system, &cpu->idle, &cpu->iowait, 
         &cpu->irq, &cpu->softirq, &cpu->steal, &cpu->guest, &cpu->guest_nice) != 11) {
         
@@ -56,13 +56,13 @@ static int mem_info(struct mem_stats *mem) {
 
     char line[128];
     char label[32];
-    unsigned long value = 0;
+    unsigned long long value = 0;
 
     mem->mem_total = 0;
     mem->mem_available = 0;
 
     while (fgets(line, sizeof(line), fptr)) {
-        if(sscanf(line, "%31[^:]: %lu", label, &value) == 2) {
+        if(sscanf(line, "%31[^:]: %llu", label, &value) == 2) {
             if (strcmp(label, "MemTotal") == 0) mem->mem_total = value;
             else if(strcmp(label, "MemAvailable") == 0) mem->mem_available = value;
         }
