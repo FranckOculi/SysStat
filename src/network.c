@@ -163,10 +163,7 @@ int run(void) {
 
                 /* Send serialized system stats. */
 
-                uint8_t stat_buffer[SYSTEM_STATS_BUFFER_SIZE];
-                serialize_system_stats(&system_stats, stat_buffer);
-
-                if ((send(connected_socket, stat_buffer, SYSTEM_STATS_BUFFER_SIZE, 0)) == -1) {
+                if ((send(connected_socket, &system_stats, sizeof(system_stats), 0)) == -1) {
                     perror("(Server) send");
                     break;
                 }

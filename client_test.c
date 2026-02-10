@@ -1,4 +1,5 @@
 #include "serialize.h"
+#include "common.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -44,6 +45,10 @@ int main(void) {
     const char message[] = "Ping!";
 
     /* This is the loop to ping server every 2 seconds and receive system stats. */
+
+    struct system_stats prev_buffer = {0};
+    struct system_stats current_buffer = {0};
+    unsigned int first_loop = 1;
     
     while(1) {
         if ((send(data_socket, message, strlen(message), 0)) == -1) {
@@ -51,23 +56,24 @@ int main(void) {
             break;
         }
 
-        uint8_t buffer[SYSTEM_STATS_BUFFER_SIZE];
-        
-        int received_bytes = recv(data_socket, buffer, SYSTEM_STATS_BUFFER_SIZE, 0);
+        int received_bytes = recv(data_socket, &current_buffer, sizeof(current_buffer), 0);
         if (received_bytes == -1) {
             perror("(Server) recv");
             exit(EXIT_FAILURE);
-        } else if (received_bytes != SYSTEM_STATS_BUFFER_SIZE) {
+        } else if (received_bytes != sizeof(current_buffer)) {
             fprintf(stderr, "Received incomplete data\n");
             exit(EXIT_FAILURE);
         }
 
-        struct system_stats stats;
-        deserialize_system_stats(&stats, buffer);
+        if (first_loop == 1) {
+            first_loop = 0;
+        } else {
+            print_cpu(calcul_cpu_active(&current_buffer, &prev_buffer));
+        }
+        print_mem(calcul_mem_active(&current_buffer));
+        print_uptime(current_buffer.uptime_hours, current_buffer.uptime_minutes);
 
-        printf("CPU user: %lu\n", stats.cpu.user);
-        printf("Memory total: %lu\n", stats.mem.mem_total);
-        printf("Uptime: %dh %dm\n", stats.uptime_hours, stats.uptime_minutes);
+        prev_buffer = current_buffer;
 
         sleep(2);
     }

@@ -2,13 +2,13 @@ CFLAGS ?= -Wall -Wextra -Iinclude
 
 all: systat
 
-systat: main.o system.o network.o serialize.o
+systat: main.o system.o network.o serialize.o common.o
 	gcc $(CFLAGS) -o $@ $^
 
-printstat: printstat.o system.o
+printstat: printstat.o system.o common.o
 	gcc $(CFLAGS) -o $@ $^
 
-client_test: client_test.o system.o serialize.o
+client_test: client_test.o system.o serialize.o common.o
 	gcc $(CFLAGS) -o $@ $^
 
 %.o: src/%.c
