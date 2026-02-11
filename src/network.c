@@ -19,6 +19,8 @@ int connection_socket = -1;
 int connected_socket = -1;
 volatile int stop = 0;
 
+static void (*cleanup_callback)(void) = NULL;
+
 static void handle_signal(int sig_number) {
     (void)sig_number;
     stop = 1;
@@ -32,10 +34,16 @@ static void handle_signal(int sig_number) {
         close(connected_socket);
         connected_socket = -1;
     }
+
+    if (cleanup_callback) {
+        cleanup_callback();
+    }
 }
 
-int run(void) {
-    signal(SIGINT, handle_signal);
+int run(void close_log_file()) {
+    cleanup_callback = close_log_file;
+
+    signal(SIGTERM, handle_signal);
 
     /* Create local socket.  */
 
@@ -178,6 +186,7 @@ int run(void) {
                 connected_socket = -1;
             }
         }
+        fflush(stdout);
     }
 
     close(connected_socket);
