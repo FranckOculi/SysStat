@@ -1,8 +1,10 @@
 #include "system.h"
+#include "common.h"
 
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
+#include <time.h>
 
 void clean_up(FILE *fptr) {
     if (fptr != NULL) fclose(fptr);
@@ -10,7 +12,7 @@ void clean_up(FILE *fptr) {
 
 static int cpu_info(struct cpu_stats *cpu) {
     if (cpu == NULL) {
-        fprintf(stderr, "cpu_info : NULL pointer provided\n");
+        print_log(stderr, "cpu_info : NULL pointer provided\n");
         return -1;
     }
 
@@ -18,6 +20,7 @@ static int cpu_info(struct cpu_stats *cpu) {
     fptr = fopen("/proc/stat", "r");
 
     if (fptr == NULL) {
+        print_log(stderr, "");
         perror("cpu_info : stat not open");
         return -1;
     }
@@ -27,7 +30,7 @@ static int cpu_info(struct cpu_stats *cpu) {
         label, &cpu->user, &cpu->nice, &cpu->system, &cpu->idle, &cpu->iowait, 
         &cpu->irq, &cpu->softirq, &cpu->steal, &cpu->guest, &cpu->guest_nice) != 11) {
         
-        fprintf(stderr, "cpu_info : unexpected format\n");
+        print_log(stderr, "cpu_info : unexpected format\n");
         clean_up(fptr);
         return -1;
     };
@@ -42,7 +45,7 @@ static int cpu_info(struct cpu_stats *cpu) {
 
 static int mem_info(struct mem_stats *mem) {
     if (mem == NULL) {
-        fprintf(stderr, "mem_info : NULL pointer provided\n");
+        print_log(stderr, "mem_info : NULL pointer provided\n");
         return -1;
     }
 
@@ -50,6 +53,7 @@ static int mem_info(struct mem_stats *mem) {
     fptr = fopen("/proc/meminfo", "r");
 
     if (fptr == NULL) {
+        print_log(stderr, "");
         perror("mem_info : meminfo not open");
         return -1;
     }
@@ -69,7 +73,7 @@ static int mem_info(struct mem_stats *mem) {
     }
 
     if (mem->mem_total == 0 || mem->mem_available == 0) {
-        fprintf(stderr, "mem_info : failed to read memTotal or memAvailable\n");
+        print_log(stderr, "mem_info : failed to read memTotal or memAvailable\n");
         clean_up(fptr);
         return -1;
     } 
@@ -80,13 +84,14 @@ static int mem_info(struct mem_stats *mem) {
 
 static int uptime_info(int *hours, int *minutes) {
     if (hours == NULL || minutes == NULL) {
-        fprintf(stderr, "uptime_info : NULL pointer provided\n");
+        print_log(stderr, "uptime_info : NULL pointer provided\n");
         return -1;
     }
 
     FILE *fptr;
     fptr = fopen("/proc/uptime", "r");
     if (fptr == NULL) {
+        print_log(stderr, "");
         perror("uptime_info : uptime not open");
         return -1;
     }
@@ -94,7 +99,7 @@ static int uptime_info(int *hours, int *minutes) {
     double uptime, idle;
 
     if (fscanf(fptr, "%lf %lf", &uptime, &idle) != 2) {
-        fprintf(stderr, "uptime_info : failed to read data\n");
+        print_log(stderr, "uptime_info : failed to read data\n");
         clean_up(fptr);
         return -1;
     }
@@ -108,7 +113,7 @@ static int uptime_info(int *hours, int *minutes) {
 
 int system_infos(struct system_stats *system_stats) {
     if (system_stats == NULL) {
-        fprintf(stderr, "system_infos : NULL pointer provided\n");
+        print_log(stderr, "system_infos : NULL pointer provided\n");
         return -1;
     }
 

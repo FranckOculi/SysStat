@@ -1,4 +1,5 @@
 #include "network.h"
+#include "common.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -39,7 +40,7 @@ int check_existing_pid(const char* pidfile) {
 
 void demonize() {
     if (check_existing_pid(PIDFILE)) {
-        fprintf(stderr, "Daemon is already running!\n");
+        print_log(stderr, "Daemon is already running!\n");
         exit(EXIT_FAILURE);
     }
 
@@ -49,6 +50,8 @@ void demonize() {
     pid = fork();
 
     if (pid < 0) {
+        print_log(stderr, "Daemon (fork)\n");
+        perror("Daemon (fork)\n");
         exit(EXIT_FAILURE);
     } 
     
@@ -59,6 +62,8 @@ void demonize() {
 
     /* Create a new session and become its leader. */
     if (setsid() < 0) {
+        print_log(stderr, "Daemon (setsid)\n");
+        perror("Daemon (setsid)\n");
         exit(EXIT_FAILURE);
     }
 
@@ -71,6 +76,8 @@ void demonize() {
     pid = fork();
 
     if (pid < 0) {
+        print_log(stderr, "Error : (setsid - seconde)\n");
+        perror("Daemon (setsid - seconde) \n");
         exit(EXIT_FAILURE);
     };
 
@@ -102,6 +109,8 @@ void demonize() {
     /* Open or create the PID file to store the daemon's PID. */
     int pid_fd = open(PIDFILE, O_RDWR | O_CREAT | O_TRUNC, 0600);
     if (pid_fd < 0) {
+        print_log(stderr, "Daemon (open pid file)\n");
+        perror("Daemon (open pid file)");
         exit(EXIT_FAILURE);
     }
     
@@ -115,7 +124,7 @@ void demonize() {
 
 int main(void) {
     demonize();
-    printf("Starting system stats monitor...\n");
+    print_log(stdout, "Starting system stats monitor...\n");
 
     return run(close_log_file);
 }

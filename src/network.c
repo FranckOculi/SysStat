@@ -1,4 +1,5 @@
 #include "system.h"
+#include "common.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -25,7 +26,7 @@ static void handle_signal(int sig_number) {
     stop = 1;
 
     if (connected_socket != -1) {
-        printf("(Server) Caught user request to close the connection.\n");
+        print_log(stdout, "(Server) Caught user request to close the connection.\n");
 
         /* To force stopping recv. */
         shutdown(connected_socket, SHUT_RDWR);
@@ -46,6 +47,7 @@ int run(void close_log_file()) {
     /* Create local socket.  */
     connection_socket = socket(SOCKET_FAMILY, SOCK_STREAM, 0);
     if (connection_socket == -1) {
+        print_log(stderr, "");
         perror("(Server) socket");
         exit(EXIT_FAILURE);
     }
@@ -65,6 +67,7 @@ int run(void close_log_file()) {
 
     int bind_return_code = bind(connection_socket, (const struct sockaddr*) &socket_name, socket_name_size);
     if (bind_return_code == -1) {
+        print_log(stderr, "");
         perror("(Server) bind");
         exit(EXIT_FAILURE);
     }
@@ -74,11 +77,12 @@ int run(void close_log_file()) {
     * So while one request is being processed other request can be waiting.
     */
     if(listen(connection_socket, MAX_CONNECTION_REQUEST) == -1) {
+        print_log(stderr, "");
         perror("(Server) listen");
         exit(EXIT_FAILURE);
     };
 
-    puts("Waiting for new connection...");
+        print_log(stdout, "Waiting for new connection...\n");
 
     /**
      * fcntl() is used to manipulate a file descriptor.
@@ -119,6 +123,7 @@ int run(void close_log_file()) {
         int ready_fds = select(connection_socket + 1, &readfds, NULL, NULL, &tv);
         if (ready_fds == -1) {
             if (stop) break;
+            print_log(stderr, "");
             perror("(Server) select");
             exit(EXIT_FAILURE);
         } else if (ready_fds == 0) {
@@ -137,6 +142,7 @@ int run(void close_log_file()) {
             connected_socket = accept(connection_socket, NULL, NULL);
             if (connected_socket == -1) {
                 if (stop) break;
+                print_log(stderr, "");
                 perror("(Server) accept");
                 continue;
             }
@@ -149,16 +155,18 @@ int run(void close_log_file()) {
 
                 /* Ensure buffer is 0-terminated.  */
                 rec_buffer[received_bytes] = '\0';
-                printf("(Server) message received : %s\n", rec_buffer);
+                print_log(stdout, "(Server) message received : %s\n", rec_buffer);
 
                 /* Retrieve system stats. */
                 if ((system_infos(&system_stats)) != 0) {
+                    print_log(stderr, "");
                     perror("(Server) system_infos");
                     break;
                 };
 
                 /* Send serialized system stats. */
                 if ((send(connected_socket, &system_stats, sizeof(system_stats), 0)) == -1) {
+                    print_log(stderr, "");
                     perror("(Server) send");
                     break;
                 }
@@ -166,9 +174,10 @@ int run(void close_log_file()) {
 
             if (received_bytes == -1) {
                 if (stop) break;
+                print_log(stderr, "");
                 perror("(Server) recv");
             } else if (received_bytes == 0) {
-                printf("(Server) client disconnected.\n");
+                print_log(stdout, "(Server) client disconnected.\n");
                 close(connected_socket);
                 connected_socket = -1;
             }

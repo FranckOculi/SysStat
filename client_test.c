@@ -15,6 +15,7 @@ int main(void) {
     /* Create local socket.  */
     int data_socket = socket(SOCKET_FAMILY, SOCK_STREAM, 0);
     if (data_socket == -1) {
+        print_log(stderr, "");
         perror("(Client) socket");
         exit(EXIT_FAILURE);
     }
@@ -34,7 +35,7 @@ int main(void) {
 
     int connect_return_code = connect(data_socket, (const struct sockaddr*) &socket_addr, socket_addr_size);
     if (connect_return_code == -1) {
-        fprintf(stderr, "(Client) The server is down.\n");
+        print_log(stderr, "(Client) The server is down.\n");
         exit(EXIT_FAILURE);
     }
 
@@ -47,16 +48,18 @@ int main(void) {
     
     while(1) {
         if ((send(data_socket, message, strlen(message), 0)) == -1) {
+            print_log(stderr, "");
             perror("(Client) send");
             break;
         }
 
         int received_bytes = recv(data_socket, &current_buffer, sizeof(current_buffer), 0);
         if (received_bytes == -1) {
+            print_log(stderr, "");
             perror("(Server) recv");
             exit(EXIT_FAILURE);
         } else if (received_bytes != sizeof(current_buffer)) {
-            fprintf(stderr, "Received incomplete data\n");
+            print_log(stderr, "Received incomplete data\n");
             exit(EXIT_FAILURE);
         }
 

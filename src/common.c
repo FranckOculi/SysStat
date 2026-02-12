@@ -1,6 +1,8 @@
 #include "common.h"
 
 #include "stdio.h"
+#include "time.h"
+#include "stdarg.h"
 
 #define RED   "\033[31m"
 #define GREEN "\033[32m"
@@ -44,4 +46,18 @@ void print_uptime(int hours, int minutes) {
     if (hours >= 5) printf(RED "Uptime: %02d:%02d\n" RESET, hours, minutes);
     else if (hours > 2) printf(YELLOW "Uptime: %02d:%02d\n" RESET, hours, minutes);
     else printf(GREEN "Uptime: %02d:%02d\n" RESET, hours, minutes);
+}
+
+void print_log(FILE *stream, const char *fmt, ...) {
+    time_t current_time = time(NULL);
+    struct tm *tm_info = localtime(&current_time);
+
+    char buffer[32];
+    strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", tm_info);
+    fprintf(stream, "[%s] - ", buffer);
+
+    va_list args;
+    va_start(args, fmt);
+    vfprintf(stream, fmt, args);
+    va_end(args);
 }
