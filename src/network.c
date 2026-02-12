@@ -130,9 +130,9 @@ int run(void close_log_file()) {
         * At this point -> connected_selected = number of file descriptors contained in
         * the three returned descriptor sets (that is, the total number of bits that are
         * set in readfds, writefds, exceptfds).
+        *
+        * We can test if a file descriptor is still present in a set.
         */
-
-        /* We can test if a file descriptor is still present in a set. */
         if (FD_ISSET(connection_socket, &readfds)) {
             connected_socket = accept(connection_socket, NULL, NULL);
             if (connected_socket == -1) {
