@@ -1,4 +1,3 @@
-#include "serialize.h"
 #include "common.h"
 
 #include <stdio.h>
@@ -14,7 +13,6 @@
 
 int main(void) {
     /* Create local socket.  */
-
     int data_socket = socket(SOCKET_FAMILY, SOCK_STREAM, 0);
     if (data_socket == -1) {
         perror("(Client) socket");
@@ -28,11 +26,9 @@ int main(void) {
     * For portability clear the whole structure, since some implementations have 
     * additional (nonstandard) fields in the structure.
     */
-
     memset(&socket_addr, 0, socket_addr_size);
 
     /* Connect socket to socket address.  */
-
     socket_addr.sun_family = AF_UNIX;
     strncpy(socket_addr.sun_path, SOCKET_NAME, sizeof(socket_addr.sun_path) - 1);
 
@@ -45,7 +41,6 @@ int main(void) {
     const char message[] = "Ping!";
 
     /* This is the loop to ping server every 2 seconds and receive system stats. */
-
     struct system_stats prev_buffer = {0};
     struct system_stats current_buffer = {0};
     unsigned int first_loop = 1;
@@ -70,6 +65,7 @@ int main(void) {
         } else {
             print_cpu(calcul_cpu_active(&current_buffer, &prev_buffer));
         }
+
         print_mem(calcul_mem_active(&current_buffer));
         print_uptime(current_buffer.uptime_hours, current_buffer.uptime_minutes);
 

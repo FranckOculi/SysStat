@@ -1,4 +1,3 @@
-#include "serialize.h"
 #include "system.h"
 
 #include <stdio.h>
@@ -29,7 +28,6 @@ static void handle_signal(int sig_number) {
         printf("(Server) Caught user request to close the connection.\n");
 
         /* To force stopping recv. */
-
         shutdown(connected_socket, SHUT_RDWR);
         close(connected_socket);
         connected_socket = -1;
@@ -46,7 +44,6 @@ int run(void close_log_file()) {
     signal(SIGTERM, handle_signal);
 
     /* Create local socket.  */
-
     connection_socket = socket(SOCKET_FAMILY, SOCK_STREAM, 0);
     if (connection_socket == -1) {
         perror("(Server) socket");
@@ -60,11 +57,9 @@ int run(void close_log_file()) {
     * For portability clear the whole structure, since some implementations have 
     * additional (nonstandard) fields in the structure.
     */
-
     memset(&socket_name, 0, socket_name_size);
     
     /* Bind socket to socket name.  */
-
     socket_name.sun_family = SOCKET_FAMILY;
     strncpy(socket_name.sun_path, SOCKET_NAME, sizeof(socket_name.sun_path) - 1);
 
@@ -78,7 +73,6 @@ int run(void close_log_file()) {
     * Prepare for accepting connections. The backlog size is set to 2.  
     * So while one request is being processed other request can be waiting.
     */
-
     if(listen(connection_socket, MAX_CONNECTION_REQUEST) == -1) {
         perror("(Server) listen");
         exit(EXIT_FAILURE);
@@ -94,14 +88,12 @@ int run(void close_log_file()) {
      * Calls such as accept(), recv() and send() will no longer block
      * if no connection or data is available.
      */
-        
     int flag = fcntl(connection_socket, F_GETFL, 0);
     fcntl(connection_socket, F_SETFL, flag | O_NONBLOCK);
     fd_set readfds;
     struct timeval tv;
 
     /* This is the main loop for handling connections.  */
-
     for(;;) {
         if (stop) break;
 
@@ -120,7 +112,6 @@ int run(void close_log_file()) {
         * Without select(), the program would remain blocked in accept() or recv()
         * functions preventing handle_signal() to stopping the server.
         */
-
         FD_ZERO(&readfds);
         FD_SET(connection_socket, &readfds);
         tv.tv_sec = 1;  /* 1 second timout to check stop variable. */
@@ -142,7 +133,6 @@ int run(void close_log_file()) {
         */
 
         /* We can test if a file descriptor is still present in a set. */
-
         if (FD_ISSET(connection_socket, &readfds)) {
             connected_socket = accept(connection_socket, NULL, NULL);
             if (connected_socket == -1) {
@@ -158,19 +148,16 @@ int run(void close_log_file()) {
             while((received_bytes = recv(connected_socket, rec_buffer, BUFFER_SIZE - 1, 0)) > 0) {
 
                 /* Ensure buffer is 0-terminated.  */
-
                 rec_buffer[received_bytes] = '\0';
                 printf("(Server) message received : %s\n", rec_buffer);
 
                 /* Retrieve system stats. */
-
                 if ((system_infos(&system_stats)) != 0) {
                     perror("(Server) system_infos");
                     break;
                 };
 
                 /* Send serialized system stats. */
-
                 if ((send(connected_socket, &system_stats, sizeof(system_stats), 0)) == -1) {
                     perror("(Server) send");
                     break;
@@ -193,7 +180,6 @@ int run(void close_log_file()) {
     close(connection_socket);
 
     /* Unlink the socket.  */
-
     unlink(SOCKET_NAME);
 
     return EXIT_SUCCESS;
