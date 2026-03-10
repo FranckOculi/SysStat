@@ -1,6 +1,6 @@
 CFLAGS ?= -Wall -Wextra -I include
 
-all: systat
+all: systat printstat client_test
 
 systat: main.o system.o network.o common.o
 	gcc $(CFLAGS) -o $@ $^
